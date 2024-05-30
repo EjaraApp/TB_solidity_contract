@@ -4,6 +4,9 @@ This Solidity smart contract implements a framework for creating and managing to
 
 Specification: https://app.clickup.com/20509715/v/dc/khx0k-79275/khx0k-127755
 
+Deployed Implementation Contract: https://basescan.org/address/0x96aa7c45db81136905c80178d16bf699c7c92ec6
+Deployed Proxy Contract: https://basescan.org/address/0x46f149a0844c5E0c59cE82a91D8734D5D9725B3B
+
 Try running some of the following tasks:
 
 ```shell
