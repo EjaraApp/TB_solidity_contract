@@ -1,4 +1,4 @@
-# Tokenized-contract
+# Tokenized Bond contract
 
 This Solidity smart contract implements a framework for creating and managing tokenized bonds on the Ethereum blockchain. It facilitates the issuance, trading, and redemption of bonds in a secure, transparent, and efficient manner. Each bond series is represented as a unique ERC-6909 token, providing users with fractional ownership of traditional bonds.
 
