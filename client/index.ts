@@ -1132,7 +1132,7 @@ const implementationApplicationBinaryInterface = [
   },
 ];
 
-const providerURL = "https://base-sepolia.public.blastapi.io";
+const providerURL = "https://base-rpc.publicnode.com";
 const privateKey =
   "0e7318e6821b7d9149cc2016c0b5939ddf5932f768a2eff2d7015da3f97114f6";
 const proxyContractAddress = "0xCDF797212fFed02Dee1a1C131d212952a1cbDd1B";
