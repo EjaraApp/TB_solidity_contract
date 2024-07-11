@@ -1,5 +1,6 @@
 import { ProxyContractHandler } from "./proxy_handler";
 import { MintBond, Minter, OperatorParam, Transfer } from "../dto/tb.dto";
+import axios from "axios";
 
 export class TBClient {
   private proxyContractHandler;
@@ -337,6 +338,32 @@ export class TBClient {
       return hash;
     } catch (error) {
       return "Operation failed: " + error;
+    }
+  }
+
+  async isTransactionConfirmed(txHash: string): Promise<boolean> {
+    let isTransactionConfirmed: boolean = false;
+    try {
+      const params = {
+        jsonrpc: "2.0",
+        method: "eth_getTransactionReceipt",
+        params: [txHash],
+        id: 1,
+      };
+
+      const response = await axios.post(
+        "https://base-rpc.publicnode.com",
+        params
+      );
+
+      const data = response.data;
+      if (data.result && data.result.status == "0x1") {
+        isTransactionConfirmed = true;
+      } else {
+        return isTransactionConfirmed;
+      }
+    } catch (error) {
+      return isTransactionConfirmed;
     }
   }
 }
