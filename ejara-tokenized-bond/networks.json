@@ -1,0 +1,8 @@
+{
+  "base": {
+    "TBProxy": {
+      "address": "0x46f149a0844c5e0c59ce82a91d8734d5d9725b3b",
+      "startBlock": 0
+    }
+  }
+}
