@@ -76,12 +76,20 @@ type TokenItrAfterExpiryAllowed @entity(immutable: true) {
 
 type Transfer @entity(immutable: true) {
   id: Bytes!
-  caller: Bytes! # address
-  sender: Bytes! # address
-  receiver: Bytes! # address
+  caller: Account! # address
+  sender: Account! # address
+  receiver: Account! # address
   TBImpl_id: BigInt! # uint256
   amount: BigInt! # uint256
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   transactionHash: Bytes!
+}
+
+type Account @entity {
+  id: Bytes!
+  balance: BigInt!
+  callerTransfers: [Transfer!] @derivedFrom(field: "caller")
+  senderTransfers: [Transfer!] @derivedFrom(field: "sender")
+  receiverTransfers: [Transfer!] @derivedFrom(field: "receiver")
 }
