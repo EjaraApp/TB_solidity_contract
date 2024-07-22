@@ -172,9 +172,9 @@ export function handleTransfer(event: TransferEvent): void {
   if (sender == null) {
     sender = new Account(event.params.sender);
     sender.balance = tb.try_balanceOf(event.params.sender, trackedToken).value;
+  } else {
+    sender.balance = sender.balance.minus(event.params.amount);
   }
-
-  sender.balance = sender.balance.minus(event.params.amount);
 
   sender.save();
 
@@ -182,9 +182,9 @@ export function handleTransfer(event: TransferEvent): void {
   if (receiver == null) {
     receiver = new Account(event.params.receiver);
     receiver.balance = tb.try_balanceOf(event.params.receiver, trackedToken).value;
+  } else {
+    receiver.balance = receiver.balance.plus(event.params.amount);
   }
-
-  receiver.balance = receiver.balance.plus(event.params.amount);
 
   receiver.save();
 
