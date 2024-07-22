@@ -8,7 +8,7 @@ dataSources:
     name: TBImpl
     network: base
     source:
-      address: "0x96aa7c45db81136905c80178d16bf699c7c92ec6"
+      address: "0x46f149a0844c5E0c59cE82a91D8734D5D9725B3B"
       abi: TBImpl
       startBlock: 14492103
     mapping:
@@ -25,6 +25,7 @@ dataSources:
         - TokenInterTransfered
         - TokenItrAfterExpiryAllowed
         - Transfer
+        - Account
       abis:
         - name: TBImpl
           file: ./abis/TBImpl.json
