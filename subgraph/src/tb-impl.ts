@@ -181,11 +181,8 @@ export function handleTransfer(event: TransferEvent): void {
   let receiver = Account.load(event.params.receiver);
   if (receiver == null) {
     receiver = new Account(event.params.receiver);
-    receiver.balance = tb.try_balanceOf(event.params.receiver, trackedToken).value;
-  } else {
-    receiver.balance = receiver.balance.plus(event.params.amount);
-  }
-
+    receiver.balance = BigInt.fromI32(0);
+  } 
+  receiver.balance = receiver.balance.plus(event.params.amount);
   receiver.save();
-
 }
