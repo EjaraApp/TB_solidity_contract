@@ -206,15 +206,15 @@ export class TBClient {
    * @param {number} tokenId - The tokenized bond id
    * @returns {string} - The operation hash
    */
-  async resumeItrAfterExpiry(tokenId: number): Promise<string> {
+  async resumeInterTransferAfterExpiry(tokenId: number): Promise<string> {
     try {
-      const functionName = "resumeItrAfterExpiry";
-      const resumeItrAfterExpiry =
+      const functionName = "resumeInterTransferAfterExpiry";
+      const resumeInterTransferAfterExpiry =
         await this.proxyContractHandler.callImplementationFunction(
           functionName,
           tokenId
         );
-      const hash: string = await resumeItrAfterExpiry?.hash;
+      const hash: string = await resumeInterTransferAfterExpiry?.hash;
       return hash;
     } catch (error) {
       return "Operation failed: " + error;
@@ -227,15 +227,15 @@ export class TBClient {
   * @param {number} tokenId - The tokenized bond id
   * @returns {string} - The operation hash
   */
-  async pauseItrAfterExpiry(tokenId: number): Promise<string> {
+  async pauseInterTransferAfterExpiry(tokenId: number): Promise<string> {
     try {
-      const functionName = "pauseItrAfterExpiry";
-      const pauseItrAfterExpiry =
+      const functionName = "pauseInterTransferAfterExpiry";
+      const pauseInterTransferAfterExpiry =
         await this.proxyContractHandler.callImplementationFunction(
           functionName,
           tokenId
         );
-      const hash: string = await pauseItrAfterExpiry?.hash;
+      const hash: string = await pauseInterTransferAfterExpiry?.hash;
       return hash;
     } catch (error) {
       return "Operation failed: " + error;

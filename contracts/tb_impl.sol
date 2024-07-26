@@ -3,8 +3,9 @@ pragma solidity 0.8.20;
 
 import "./ERC-6909.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 
-contract TBImpl is Ownable(msg.sender), ERC6909 {
+contract TokenizationImplementation is Ownable(msg.sender), ERC6909 {
 
     event MinterReplaced(
         uint tokenId,
@@ -13,7 +14,7 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
     );
     event MinterRemoved(address indexed minter);
     event TokenInterTransferAllowed(uint tokenId, bool isTransferable);
-    event TokenItrAfterExpiryAllowed(uint tokenId, bool isTransferable);
+    event TokenInterTransferAfterExpiryAllowed(uint tokenId, bool isTransferable);
     event TokenInterTransfered(
         address indexed from,
         address indexed receiver,
@@ -92,6 +93,7 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
     error fromIsReceiver();
     error insufficientBalance();
     error isNotOwnerNorOperator();
+    error alreadyOperator();
 
     modifier notMatured(uint _tokenId) {
         if(block.timestamp > TokenMetadata[_tokenId].expirationDate) revert isMature();
@@ -170,24 +172,24 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
     // INTER TRANSFER AFTER EXPIRY PAUSE AND RESUME
     //----------------------------------------------------------------
 
-    function resumeItrAfterExpiry(
+    function resumeInterTransferAfterExpiry(
         uint _tokenId
     ) external onlyOwner tokenExist(_tokenId) {
         if(!TokenMetadata[_tokenId].tokenItrExpiryPaused) revert itrAfterExpiryNotPaused();
 
         TokenMetadata[_tokenId].tokenItrExpiryPaused = false;
-        emit TokenItrAfterExpiryAllowed(
+        emit TokenInterTransferAfterExpiryAllowed(
             _tokenId,
             TokenMetadata[_tokenId].tokenItrExpiryPaused
         );
     }
 
-    function pauseItrAfterExpiry(
+    function pauseInterTransferAfterExpiry(
         uint _tokenId
     ) external onlyOwner tokenExist(_tokenId) {
         if(TokenMetadata[_tokenId].tokenItrExpiryPaused) revert itrAfterExpiryIsPaused();
         TokenMetadata[_tokenId].tokenItrExpiryPaused = true;
-        emit TokenItrAfterExpiryAllowed(
+        emit TokenInterTransferAfterExpiryAllowed(
             _tokenId,
             TokenMetadata[_tokenId].tokenItrExpiryPaused
         );
@@ -304,6 +306,7 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
         _;
     }
 
+
     //----------------------------------------------------------------------------
     // Operators
     //----------------------------------------------------------------------------
@@ -314,23 +317,21 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
     ) public notPausedContract {
         for (uint i = 0; i < upl.length; i++) {
             OperatorParam memory param = upl[i];
-            //if action is ADD, check if owner is caller and add operator
+            //if action is ADD, check if owner or token minter is caller 
+            if(param.owner != msg.sender && minterIsOperator(param.tokenId, msg.sender) == false) revert isNotOwner();
             if (param.action == OperatorAction.Add) {
-                if(param.owner != msg.sender) revert isNotOwner();
-                setOperator(param.operator, true);
+                if(isOperator[param.owner][param.operator] == true) revert alreadyOperator();
+                isOperator[param.owner][param.operator] = true;
             } 
             //if action is REMOVE, check if owner is caller and operator exist, then delete operator
             else {
-
-                if (
-                    param.owner == msg.sender &&
-                    isOperator[msg.sender][param.operator] == true
-                ) {
-                    setOperator(param.operator, false);
-                }
+                if(isOperator[param.owner][param.operator] == false) revert notOperator();
+                isOperator[param.owner][param.operator] = false;
+                
             }
         }
     }
+
 
     // check if the minter is an operator for a token
     function minterIsOperator(
@@ -353,7 +354,7 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
                 //if caller is not sender, check if caller is operator or minter
                 if (msg.sender != from) {
                     if (
-                        !isOperator[from][msg.sender] ||
+                        isOperator[from][msg.sender] ||
                         minterIsOperator(tokenId, msg.sender)
                     ) {
                        isOwnerOrOperator =  true;
@@ -433,9 +434,13 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
 
                 if(balanceOf[from][tokenId] < amount) revert insufficientBalance();
 
-                transfer(receiver, tokenId, amount);
+                if(msg.sender != from && minterIsOperator(tokenId, msg.sender) && isOperator[from][msg.sender] == false){
+                    isOperator[from][msg.sender] = true;
+                }
+                transferFrom(from, receiver, tokenId, amount);
 
             }
         }
     }
 }
+
