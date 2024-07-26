@@ -73,10 +73,10 @@ contract TokenizationImplementation is Ownable(msg.sender), ERC6909 {
     error nonExistantToken();
     error tokenAlreadyExist();
     error invalidInputList();
-    error itrNotPaused();
-    error itrPaused();
-    error itrAfterExpiryNotPaused();
-    error itrAfterExpiryIsPaused();
+    error interTransferNotPaused();
+    error interTransferPaused();
+    error interTransferPausedAfterExpiryNotPaused();
+    error interTransferAfterExpiryIsPaused();
     error isTokenOperator();
     error notOperator();
     error isFrozen();
@@ -134,7 +134,7 @@ contract TokenizationImplementation is Ownable(msg.sender), ERC6909 {
     function resumeInterTransfer(
         uint _tokenId
     ) external onlyOwner tokenExist(_tokenId) {
-        if(!TokenMetadata[_tokenId].tokenItrPaused) revert itrNotPaused();
+        if(!TokenMetadata[_tokenId].tokenItrPaused) revert interTransferNotPaused();
         TokenMetadata[_tokenId].tokenItrPaused = false;
         emit TokenInterTransferAllowed(
             _tokenId,
@@ -146,7 +146,7 @@ contract TokenizationImplementation is Ownable(msg.sender), ERC6909 {
     function pauseInterTransfer(
         uint _tokenId
     ) external onlyOwner tokenExist(_tokenId) {
-        if(TokenMetadata[_tokenId].tokenItrPaused) revert itrPaused();
+        if(TokenMetadata[_tokenId].tokenItrPaused) revert interTransferPaused();
         TokenMetadata[_tokenId].tokenItrPaused = true;
         emit TokenInterTransferAllowed(
             _tokenId,
@@ -175,7 +175,7 @@ contract TokenizationImplementation is Ownable(msg.sender), ERC6909 {
     function resumeInterTransferAfterExpiry(
         uint _tokenId
     ) external onlyOwner tokenExist(_tokenId) {
-        if(!TokenMetadata[_tokenId].tokenItrExpiryPaused) revert itrAfterExpiryNotPaused();
+        if(!TokenMetadata[_tokenId].tokenItrExpiryPaused) revert interTransferPausedAfterExpiryNotPaused();
 
         TokenMetadata[_tokenId].tokenItrExpiryPaused = false;
         emit TokenInterTransferAfterExpiryAllowed(
@@ -187,7 +187,7 @@ contract TokenizationImplementation is Ownable(msg.sender), ERC6909 {
     function pauseInterTransferAfterExpiry(
         uint _tokenId
     ) external onlyOwner tokenExist(_tokenId) {
-        if(TokenMetadata[_tokenId].tokenItrExpiryPaused) revert itrAfterExpiryIsPaused();
+        if(TokenMetadata[_tokenId].tokenItrExpiryPaused) revert interTransferAfterExpiryIsPaused();
         TokenMetadata[_tokenId].tokenItrExpiryPaused = true;
         emit TokenInterTransferAfterExpiryAllowed(
             _tokenId,
@@ -426,9 +426,9 @@ contract TokenizationImplementation is Ownable(msg.sender), ERC6909 {
                 uint amount = transferDestination[j].amount;
                 address receiver = transferDestination[j].receiver;
 
-                if(!_interTransferAllowed(tokenId, from, receiver)) revert itrPaused();
+                if(!_interTransferAllowed(tokenId, from, receiver)) revert interTransferPaused();
 
-                if(!_isInterTransferAfterExpiryAllowed(tokenId, receiver)) revert itrAfterExpiryIsPaused();
+                if(!_isInterTransferAfterExpiryAllowed(tokenId, receiver)) revert interTransferAfterExpiryIsPaused();
 
                 if(from == receiver) revert fromIsReceiver();
 
