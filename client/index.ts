@@ -1147,7 +1147,7 @@ const signer = new ethers.Wallet(privateKey, provider);
     signer
   );
 
-  const destinations = [
+  const deposit = [
     {
       tokenId: 1,
       amount: 2000,
@@ -1159,11 +1159,23 @@ const signer = new ethers.Wallet(privateKey, provider);
       receiver: "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
     },
   ];
+
+  const withdraw = [
+    {
+      tokenId: 1,
+      amount: 2000,
+      receiver: "0x5B38Da6a701c568545dCfcB03FcB875f56beddC4",
+    },
+  ]
   const transfers = [
     {
       from: "0x87Eb7928C7EF7a8600637a34327d26Af9d9602D5",
-      transferDestination: destinations,
+      transferDestination: deposit,
     },
+    {
+      from: "0x87Eb7928C7EF7a8600637a34327d26Af9d9602D5",
+      transferDestination: withdraw,
+    }
   ];
 
   const transfer = await proxyContract.makeTransfer(transfers);
