@@ -9,7 +9,7 @@ module.exports = {
     enabled: true,
     runs: 200, 
   },
-  defaultNetwork: "baseSepolia",
+  defaultNetwork: "hardhat",
   networks: {
     hardhat: {
       accounts: {

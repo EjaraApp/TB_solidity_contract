@@ -501,6 +501,32 @@ describe("Tokenized bonds Test", () => {
         if (event.name === "Transfer") {
             const { caller, sender, receiver, id, amount } = event.args;
 
+            // Find the expected transfer for this event
+            let expectedTransfer;
+            for (const t of transfers) {
+
+              if (t.from.toLowerCase() === sender.toLowerCase()) {
+
+                  expectedTransfer = t.transferDestination.find(dest => 
+                        dest.receiver.toLowerCase() === receiver.toLowerCase() && 
+                        BigInt(dest.tokenId) === BigInt(id) && 
+                        BigInt(dest.amount) === BigInt(amount)
+                    );
+
+                    if (expectedTransfer) {
+                        expectedTransfer.from = t.from;
+                        break;
+                    }
+                }
+            }
+
+            // Check that the transfer event log matches exactly the expected transfer
+            expect(expectedTransfer).to.not.be.undefined;
+            expect(sender).to.equal(expectedTransfer.from);
+            expect(receiver).to.equal(expectedTransfer.receiver);
+            expect(amount).to.equal(expectedTransfer.amount);
+            expect(id).to.equal(expectedTransfer.tokenId);
+
             // Check that sender is not equal to receiver
             expect(sender).to.not.equal(receiver);
 
@@ -508,10 +534,9 @@ describe("Tokenized bonds Test", () => {
             const senderBalance = await tbContract.balanceOf(sender, id);
             const receiverBalance = await tbContract.balanceOf(receiver, id);
 
-            console.log(`Token Idd: ${id}, Amount: ${amount},Sender: ${sender}, Sender Balance: ${senderBalance}, Receiver: ${receiver}, Receiver Balance: ${receiverBalance}`);
-              // Balance of 'sender' should decrease by the total amount sent
+              // Check that balance of 'sender' decreases by the total amount sent
             expect(senderBalance).to.equal(balancesBefore[sender][id] - totalAmounts[sender][id]);
-            // Balance of 'receiver' should increase by the respective amount in each transfer
+            // Check that balance of 'receiver' increases by the respective amount in each transfer
             expect(receiverBalance).to.equal(balancesBefore[receiver][id] + amount);
         }
     }
@@ -584,6 +609,32 @@ describe("Tokenized bonds Test", () => {
         if (event.name === "Transfer") {
             const { caller, sender, receiver, id, amount } = event.args;
 
+            // Find the expected transfer for this event
+            let expectedTransfer;
+            for (const t of transfers) {
+
+              if (t.from.toLowerCase() === sender.toLowerCase()) {
+
+                  expectedTransfer = t.transferDestination.find(dest => 
+                        dest.receiver.toLowerCase() === receiver.toLowerCase() && 
+                        BigInt(dest.tokenId) === BigInt(id) && 
+                        BigInt(dest.amount) === BigInt(amount)
+                    );
+
+                    if (expectedTransfer) {
+                        expectedTransfer.from = t.from;
+                        break;
+                    }
+                }
+            }
+
+            // Check that the transfer event log matches exactly the expected transfer
+            expect(expectedTransfer).to.not.be.undefined;
+            expect(sender).to.equal(expectedTransfer.from);
+            expect(receiver).to.equal(expectedTransfer.receiver);
+            expect(amount).to.equal(expectedTransfer.amount);
+            expect(id).to.equal(expectedTransfer.tokenId);
+
             // Check that sender is not equal to receiver
             expect(sender).to.not.equal(receiver);
 
@@ -591,12 +642,11 @@ describe("Tokenized bonds Test", () => {
             const senderBalance = await tbContract.balanceOf(sender, id);
             const receiverBalance = await tbContract.balanceOf(receiver, id);
 
-            console.log(`Token Idd: ${id}, Amount: ${amount},Sender: ${sender}, Sender Balance: ${senderBalance}, Receiver: ${receiver}, Receiver Balance: ${receiverBalance}`);
-
-              // Balance of 'sender' should decrease by the total amount sent
+              // Check that balance of 'sender' decreases by the total amount sent
             expect(senderBalance).to.equal(balancesBefore[sender][id] - totalAmounts[sender][id]);
-            // Balance of 'receiver' should increase by the total amount received
+            // Check that balance of 'receiver' increases by the total amount received
             expect(receiverBalance).to.equal(balancesBefore[receiver][id] + totalAmounts[receiver][id]);
+
         }
     }
 
