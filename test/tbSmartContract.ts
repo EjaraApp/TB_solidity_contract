@@ -13,8 +13,9 @@ describe("Tokenized bonds Test", () => {
     signers = await ethers.getSigners();
 
     // deploy implementation contract
-    const TBImpl = await ethers.getContractFactory("TBImpl");
+    const TBImpl = await ethers.getContractFactory("TokenizationImplementation");
     const tbImpl = await TBImpl.deploy();
+
 
     await tbImpl.waitForDeployment();
     tbImplementationContract = tbImpl.target;
@@ -140,7 +141,7 @@ describe("Tokenized bonds Test", () => {
     it("should fail if minter is tight to a mint", async () => {
       await tbContract
         .connect(signers[1])
-        .mint(1775147997, 10, 3, 100000000, true, "CMR Bond");
+        .mint(1775147997, 10, 3, 100000, true, "CMR Bond");
       await expect(tbContract.removeMinter(await signers[1].getAddress())).to.be
         .reverted;
     });
@@ -284,7 +285,7 @@ describe("Tokenized bonds Test", () => {
 
     describe("Test resume InterTransfer After Expiry", async () => {
       it("should fail if caller is not contract owner", async () => {
-        await expect(tbContract.connect(signers[2]).pauseItrAfterExpiry(1)).to
+        await expect(tbContract.connect(signers[2]).pauseInterTransferAfterExpiry(1)).to
           .be.reverted;
       });
     });
@@ -311,7 +312,7 @@ describe("Tokenized bonds Test", () => {
     });
   });
   describe("Test Operator", async () => {
-    it("should successfully update Operators", async () => {
+    it("should revert if not removing a non Operator", async () => {
       const operators = [
         {
           action: 0,
@@ -326,8 +327,49 @@ describe("Tokenized bonds Test", () => {
           operator: await signers[5].getAddress(),
         },
       ];
-      await tbContract.connect(signers[3]).updateOperators(operators);
+
+      await expect(tbContract.connect(signers[1]).updateOperators(operators)).to.be.reverted;
+
     });
+
+    it("should successfully update Operators", async () => {
+      const operators = [
+        {
+          action: 0,
+          owner: await signers[3].getAddress(),
+          tokenId: 3,
+          operator: await signers[4].getAddress(),
+        },
+        {
+          action: 0,
+          owner: await signers[3].getAddress(),
+          tokenId: 1,
+          operator: await signers[5].getAddress(),
+        },
+      ];
+      await tbContract.connect(signers[1]).updateOperators(operators);
+    });
+
+    it("should revert if adding an existing Operator", async () => {
+      const operators = [
+        {
+          action: 0,
+          owner: await signers[3].getAddress(),
+          tokenId: 3,
+          operator: await signers[4].getAddress(),
+        },
+        {
+          action: 1,
+          owner: await signers[3].getAddress(),
+          tokenId: 1,
+          operator: await signers[5].getAddress(),
+        },
+      ];
+
+      await expect(tbContract.connect(signers[1]).updateOperators(operators)).to.be.reverted;
+
+    });
+
   });
 
   describe("Test Transfer", async () => {
@@ -335,17 +377,12 @@ describe("Tokenized bonds Test", () => {
       const transfer = [
         {
           from: await signers[4].getAddress(),
-          transferDest: [
+          transferDestination: [
             {
               tokenId: 3,
               amount: 1000,
               receiver: await signers[2].getAddress(),
-            },
-            {
-              tokenId: 3,
-              amount: 8000,
-              receiver: await signers[3].getAddress(),
-            },
+            }
           ],
         },
       ];
@@ -358,7 +395,7 @@ describe("Tokenized bonds Test", () => {
       const transfer = [
         {
           from: await signers[4].getAddress(),
-          transferDest: [
+          transferDestination: [
             {
               tokenId: 3,
               amount: 1000,
@@ -385,7 +422,7 @@ describe("Tokenized bonds Test", () => {
       const transfer = [
         {
           from: await signers[1].getAddress(),
-          transferDest: [
+          transferDestination: [
             {
               tokenId: 3,
               amount: 1000,
@@ -403,31 +440,167 @@ describe("Tokenized bonds Test", () => {
       await expect(tbContract.connect(signers[1]).makeTransfer(transfer)).to.be
         .reverted;
     });
-    it("should Transfer successfully", async () => {
-      const transfer = [
+    it("should Transfer(DEPOSIT) successfully", async () => {
+      const deposit = [
         {
-          from: await signers[1].getAddress(),
-          transferDestination: [
-            {
-              tokenId: 3,
-              amount: 1000,
-              receiver: await signers[2].getAddress(),
-            },
-            {
-              tokenId: 1,
-              amount: 8000,
-              receiver: await signers[3].getAddress(),
-            },
-            {
-              tokenId: 3,
-              amount: 5000,
-              receiver: await signers[4].getAddress(),
-            },
-          ],
+          tokenId: 3,
+          amount: 1000,
+          receiver: await signers[2].getAddress(),
+        },
+        {
+          tokenId: 3,
+          amount: 8000,
+          receiver: await signers[3].getAddress(),
+        },
+        {
+          tokenId: 3,
+          amount: 5000,
+          receiver: await signers[4].getAddress(),
         },
       ];
+      
 
-      await tbContract.connect(signers[1]).makeTransfer(transfer);
-    });
+      const transfers = [
+        {
+          from: await signers[1].getAddress(),
+          transferDestination: deposit
+        }
+      ];
+
+
+
+      // Store balances before the transfer
+      const balancesBefore = {};
+      const totalAmounts = {};
+      for (const t of transfers) {
+          const from = t.from;
+          balancesBefore[from] = balancesBefore[from] || {};
+          totalAmounts[from] = totalAmounts[from] || {};
+
+          for (const dest of t.transferDestination) {
+              const receiver = dest.receiver;
+              const tokenId = dest.tokenId;
+              const amount = dest.amount;
+
+              // Store balance of 'from' address before the transfer
+              balancesBefore[from][tokenId] = balancesBefore[from][tokenId] || (await tbContract.balanceOf(from, tokenId));
+              // Store balance of 'receiver' address before the transfer
+              balancesBefore[receiver] = balancesBefore[receiver] || {};
+              balancesBefore[receiver][tokenId] = balancesBefore[receiver][tokenId] || (await tbContract.balanceOf(receiver, tokenId));
+              // Store total amount sent 'from' to 'receiver'
+              totalAmounts[from][tokenId] = (totalAmounts[from][tokenId] || BigInt(0)) + BigInt(amount);
+            }
+        }
+
+      const trx = await tbContract.connect(signers[1]).makeTransfer(transfers);
+       const receipt = await trx.wait();
+       // Verify transfer logs
+       for (const log of receipt.logs) {
+        const event = tbContract.interface.parseLog(log);
+
+        if (event.name === "Transfer") {
+            const { caller, sender, receiver, id, amount } = event.args;
+
+            // Check that sender is not equal to receiver
+            expect(sender).to.not.equal(receiver);
+
+            // Check balance changes
+            const senderBalance = await tbContract.balanceOf(sender, id);
+            const receiverBalance = await tbContract.balanceOf(receiver, id);
+
+            console.log(`Token Idd: ${id}, Amount: ${amount},Sender: ${sender}, Sender Balance: ${senderBalance}, Receiver: ${receiver}, Receiver Balance: ${receiverBalance}`);
+              // Balance of 'sender' should decrease by the total amount sent
+            expect(senderBalance).to.equal(balancesBefore[sender][id] - totalAmounts[sender][id]);
+            // Balance of 'receiver' should increase by the respective amount in each transfer
+            expect(receiverBalance).to.equal(balancesBefore[receiver][id] + amount);
+        }
+    }
+
+       
+      });
+
+
+    it("should Transfer(WITHDRAW) successfully", async () => {
+
+      const withdraw = [
+        {
+          tokenId: 3,
+          amount: 4000,
+          receiver: await signers[1].getAddress(),
+        }
+      ];
+
+      const withdraw_2 = [
+        {
+          tokenId: 3,
+          amount: 6000,
+          receiver: await signers[1].getAddress(),
+        }
+      ];
+      const transfers = [
+        {
+          from: await signers[4].getAddress(),
+          transferDestination: withdraw
+        },
+        {
+          from: await signers[3].getAddress(),
+          transferDestination: withdraw_2
+        }
+      ];
+
+
+
+      // Store balances before the transfer
+      const balancesBefore = {};
+      const totalAmounts = {};
+      for (const t of transfers) {
+          const from = t.from;
+          balancesBefore[from] = balancesBefore[from] || {};
+          totalAmounts[from] = totalAmounts[from] || {};
+
+          for (const dest of t.transferDestination) {
+              const receiver = dest.receiver;
+              const tokenId = dest.tokenId;
+              const amount = dest.amount;
+
+              // Store balance of 'from' address before the transfer
+              balancesBefore[from][tokenId] = balancesBefore[from][tokenId] || (await tbContract.balanceOf(from, tokenId));
+              // Store balance of 'receiver' address before the transfer
+              balancesBefore[receiver] = balancesBefore[receiver] || {};
+              totalAmounts[receiver] = totalAmounts[receiver] || {};
+              balancesBefore[receiver][tokenId] = balancesBefore[receiver][tokenId] || (await tbContract.balanceOf(receiver, tokenId));
+              // Store total amount sent 'from' to 'receiver'
+              totalAmounts[from][tokenId] = (totalAmounts[from][tokenId] || BigInt(0)) + BigInt(amount);
+              totalAmounts[receiver][tokenId] = (totalAmounts[receiver][tokenId] || BigInt(0)) + BigInt(amount);
+
+          }
+      }
+
+      const trx = await tbContract.connect(signers[1]).makeTransfer(transfers);
+       const receipt = await trx.wait();
+       for (const log of receipt.logs) {
+        const event = tbContract.interface.parseLog(log);
+
+        if (event.name === "Transfer") {
+            const { caller, sender, receiver, id, amount } = event.args;
+
+            // Check that sender is not equal to receiver
+            expect(sender).to.not.equal(receiver);
+
+            // Check balance changes
+            const senderBalance = await tbContract.balanceOf(sender, id);
+            const receiverBalance = await tbContract.balanceOf(receiver, id);
+
+            console.log(`Token Idd: ${id}, Amount: ${amount},Sender: ${sender}, Sender Balance: ${senderBalance}, Receiver: ${receiver}, Receiver Balance: ${receiverBalance}`);
+
+              // Balance of 'sender' should decrease by the total amount sent
+            expect(senderBalance).to.equal(balancesBefore[sender][id] - totalAmounts[sender][id]);
+            // Balance of 'receiver' should increase by the total amount received
+            expect(receiverBalance).to.equal(balancesBefore[receiver][id] + totalAmounts[receiver][id]);
+        }
+    }
+
+       
+      });
   });
 });

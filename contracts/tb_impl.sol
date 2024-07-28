@@ -13,6 +13,7 @@ contract TokenizationImplementation is Ownable(msg.sender), ERC6909 {
         address indexed newMinter
     );
     event MinterRemoved(address indexed minter);
+    event MinterAdded(address indexed minter);
     event TokenInterTransferAllowed(uint tokenId, bool isTransferable);
     event TokenInterTransferAfterExpiryAllowed(uint tokenId, bool isTransferable);
     event TokenInterTransfered(
@@ -248,6 +249,7 @@ contract TokenizationImplementation is Ownable(msg.sender), ERC6909 {
         if(minterExist[_minter]) revert minterAlreadyExist();
         minterTokensMetadata[_minter] =  new uint[](0);
         minterExist[_minter] = true;
+        emit MinterAdded(_minter);
     }
 
     function replaceMinter(
