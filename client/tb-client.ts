@@ -326,20 +326,6 @@ export class TBClient {
     }
   }
 
-  async updateOperators(operators: OperatorParam[]): Promise<string> {
-    try {
-      const functionName = "updateOperators";
-      const updateOperators =
-        await this.proxyContractHandler.callImplementationFunction(
-          functionName,
-          operators
-        );
-      const hash: string = await updateOperators?.hash;
-      return hash;
-    } catch (error) {
-      return "Operation failed: " + error;
-    }
-  }
 
   async isTransactionConfirmed(txHash: string): Promise<boolean> {
     let isTransactionConfirmed: boolean = false;

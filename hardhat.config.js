@@ -9,8 +9,13 @@ module.exports = {
     enabled: true,
     runs: 200, 
   },
-  defaultNetwork: "baseSepolia",
+  defaultNetwork: "hardhat",
   networks: {
+    hardhat: {
+      accounts: {
+        count: 50 
+      }
+    },
     sepolia: {
       url: "https://rpc2.sepolia.org",
       chainId: 11155111,
@@ -28,3 +33,4 @@ module.exports = {
     },
   },
 };
+

@@ -12,6 +12,7 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
         address indexed newMinter
     );
     event MinterRemoved(address indexed minter);
+    event MinterAdded(address indexed minter);
     event TokenInterTransferAllowed(uint tokenId, bool isTransferable);
     event TokenItrAfterExpiryAllowed(uint tokenId, bool isTransferable);
     event TokenInterTransfered(
@@ -246,6 +247,7 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
         if(minterExist[_minter]) revert minterAlreadyExist();
         minterTokensMetadata[_minter] =  new uint[](0);
         minterExist[_minter] = true;
+        emit MinterAdded(_minter);
     }
 
     function replaceMinter(
@@ -304,33 +306,10 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
         _;
     }
 
+
     //----------------------------------------------------------------------------
     // Operators
     //----------------------------------------------------------------------------
-
-    // handle both additions and removals of operators for specific tokens
-    function updateOperators(
-        OperatorParam[] memory upl
-    ) public notPausedContract {
-        for (uint i = 0; i < upl.length; i++) {
-            OperatorParam memory param = upl[i];
-            //if action is ADD, check if owner is caller and add operator
-            if (param.action == OperatorAction.Add) {
-                if(param.owner != msg.sender) revert isNotOwner();
-                setOperator(param.operator, true);
-            } 
-            //if action is REMOVE, check if owner is caller and operator exist, then delete operator
-            else {
-
-                if (
-                    param.owner == msg.sender &&
-                    isOperator[msg.sender][param.operator] == true
-                ) {
-                    setOperator(param.operator, false);
-                }
-            }
-        }
-    }
 
     // check if the minter is an operator for a token
     function minterIsOperator(
@@ -353,7 +332,6 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
                 //if caller is not sender, check if caller is operator or minter
                 if (msg.sender != from) {
                     if (
-                        !isOperator[from][msg.sender] ||
                         minterIsOperator(tokenId, msg.sender)
                     ) {
                        isOwnerOrOperator =  true;
@@ -433,9 +411,13 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
 
                 if(balanceOf[from][tokenId] < amount) revert insufficientBalance();
 
-                transfer(receiver, tokenId, amount);
+                if(msg.sender != from && minterIsOperator(tokenId, msg.sender)){
+                    allowance[from][msg.sender][tokenId] = amount;
+                }
+                transferFrom(from, receiver, tokenId, amount);
 
             }
         }
     }
 }
+
