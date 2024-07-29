@@ -94,7 +94,6 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
     error insufficientBalance();
     error isNotOwnerNorOperator();
 
-
     modifier notMatured(uint _tokenId) {
         if(block.timestamp > TokenMetadata[_tokenId].expirationDate) revert isMature();
         _;
@@ -333,7 +332,6 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
                 //if caller is not sender, check if caller is operator or minter
                 if (msg.sender != from) {
                     if (
-                        isOperator[from][msg.sender] ||
                         minterIsOperator(tokenId, msg.sender)
                     ) {
                        isOwnerOrOperator =  true;
