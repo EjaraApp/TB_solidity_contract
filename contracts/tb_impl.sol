@@ -436,8 +436,8 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
 
                 if(balanceOf[from][tokenId] < amount) revert insufficientBalance();
 
-                if(msg.sender != from && minterIsOperator(tokenId, msg.sender) && isOperator[from][msg.sender] == false){
-                    isOperator[from][msg.sender] = true;
+                if(msg.sender != from && minterIsOperator(tokenId, msg.sender)){
+                    allowance[from][msg.sender][tokenId] = amount;
                 }
                 transferFrom(from, receiver, tokenId, amount);
 
