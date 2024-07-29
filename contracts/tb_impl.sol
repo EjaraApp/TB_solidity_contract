@@ -3,7 +3,6 @@ pragma solidity 0.8.20;
 
 import "./ERC-6909.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "hardhat/console.sol";
 
 contract TBImpl is Ownable(msg.sender), ERC6909 {
 
@@ -312,28 +311,6 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
     //----------------------------------------------------------------------------
     // Operators
     //----------------------------------------------------------------------------
-
-    // handle both additions and removals of operators for specific tokens
-    function updateOperators(
-        OperatorParam[] memory upl
-    ) public notPausedContract {
-        for (uint i = 0; i < upl.length; i++) {
-            OperatorParam memory param = upl[i];
-            //if action is ADD, check if owner or token minter is caller 
-            if(param.owner != msg.sender && minterIsOperator(param.tokenId, msg.sender) == false) revert isNotOwner();
-            if (param.action == OperatorAction.Add) {
-                if(isOperator[param.owner][param.operator] == true) revert alreadyOperator();
-                isOperator[param.owner][param.operator] = true;
-            } 
-            //if action is REMOVE, check if owner is caller and operator exist, then delete operator
-            else {
-                if(isOperator[param.owner][param.operator] == false) revert notOperator();
-                isOperator[param.owner][param.operator] = false;
-                
-            }
-        }
-    }
-
 
     // check if the minter is an operator for a token
     function minterIsOperator(
