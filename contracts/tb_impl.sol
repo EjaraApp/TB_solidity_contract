@@ -5,7 +5,7 @@ import "./ERC-6909.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "hardhat/console.sol";
 
-contract TokenizationImplementation is Ownable(msg.sender), ERC6909 {
+contract TBImpl is Ownable(msg.sender), ERC6909 {
 
     event MinterReplaced(
         uint tokenId,
