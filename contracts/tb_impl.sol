@@ -15,7 +15,7 @@ contract TokenizationImplementation is Ownable(msg.sender), ERC6909 {
     event MinterRemoved(address indexed minter);
     event MinterAdded(address indexed minter);
     event TokenInterTransferAllowed(uint tokenId, bool isTransferable);
-    event TokenInterTransferAfterExpiryAllowed(uint tokenId, bool isTransferable);
+    event TokenItrAfterExpiryAllowed(uint tokenId, bool isTransferable);
     event TokenInterTransfered(
         address indexed from,
         address indexed receiver,
@@ -173,24 +173,24 @@ contract TokenizationImplementation is Ownable(msg.sender), ERC6909 {
     // INTER TRANSFER AFTER EXPIRY PAUSE AND RESUME
     //----------------------------------------------------------------
 
-    function resumeInterTransferAfterExpiry(
+    function resumeItrAfterExpiry(
         uint _tokenId
     ) external onlyOwner tokenExist(_tokenId) {
         if(!TokenMetadata[_tokenId].tokenItrExpiryPaused) revert itrAfterExpiryNotPaused();
 
         TokenMetadata[_tokenId].tokenItrExpiryPaused = false;
-        emit TokenInterTransferAfterExpiryAllowed(
+        emit TokenItrAfterExpiryAllowed(
             _tokenId,
             TokenMetadata[_tokenId].tokenItrExpiryPaused
         );
     }
 
-    function pauseInterTransferAfterExpiry(
+    function pauseItrAfterExpiry(
         uint _tokenId
     ) external onlyOwner tokenExist(_tokenId) {
         if(TokenMetadata[_tokenId].tokenItrExpiryPaused) revert itrAfterExpiryIsPaused();
         TokenMetadata[_tokenId].tokenItrExpiryPaused = true;
-        emit TokenInterTransferAfterExpiryAllowed(
+        emit TokenItrAfterExpiryAllowed(
             _tokenId,
             TokenMetadata[_tokenId].tokenItrExpiryPaused
         );
