@@ -333,7 +333,6 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
                 //if caller is not sender, check if caller is operator or minter
                 if (msg.sender != from) {
                     if (
-                        isOperator[from][msg.sender] ||
                         minterIsOperator(tokenId, msg.sender)
                     ) {
                        isOwnerOrOperator =  true;
