@@ -206,15 +206,15 @@ export class TBClient {
    * @param {number} tokenId - The tokenized bond id
    * @returns {string} - The operation hash
    */
-  async resumeInterTransferAfterExpiry(tokenId: number): Promise<string> {
+  async resumeItrAfterExpiry(tokenId: number): Promise<string> {
     try {
-      const functionName = "resumeInterTransferAfterExpiry";
-      const resumeInterTransferAfterExpiry =
+      const functionName = "resumeItrAfterExpiry";
+      const resumeItrAfterExpiry =
         await this.proxyContractHandler.callImplementationFunction(
           functionName,
           tokenId
         );
-      const hash: string = await resumeInterTransferAfterExpiry?.hash;
+      const hash: string = await resumeItrAfterExpiry?.hash;
       return hash;
     } catch (error) {
       return "Operation failed: " + error;
@@ -227,15 +227,15 @@ export class TBClient {
   * @param {number} tokenId - The tokenized bond id
   * @returns {string} - The operation hash
   */
-  async pauseInterTransferAfterExpiry(tokenId: number): Promise<string> {
+  async pauseItrAfterExpiry(tokenId: number): Promise<string> {
     try {
-      const functionName = "pauseInterTransferAfterExpiry";
-      const pauseInterTransferAfterExpiry =
+      const functionName = "pauseItrAfterExpiry";
+      const pauseItrAfterExpiry =
         await this.proxyContractHandler.callImplementationFunction(
           functionName,
           tokenId
         );
-      const hash: string = await pauseInterTransferAfterExpiry?.hash;
+      const hash: string = await pauseItrAfterExpiry?.hash;
       return hash;
     } catch (error) {
       return "Operation failed: " + error;
@@ -326,20 +326,6 @@ export class TBClient {
     }
   }
 
-  async updateOperators(operators: OperatorParam[]): Promise<string> {
-    try {
-      const functionName = "updateOperators";
-      const updateOperators =
-        await this.proxyContractHandler.callImplementationFunction(
-          functionName,
-          operators
-        );
-      const hash: string = await updateOperators?.hash;
-      return hash;
-    } catch (error) {
-      return "Operation failed: " + error;
-    }
-  }
 
   async isTransactionConfirmed(txHash: string): Promise<boolean> {
     let isTransactionConfirmed: boolean = false;
