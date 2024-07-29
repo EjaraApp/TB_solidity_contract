@@ -93,7 +93,7 @@ contract TBImpl is Ownable(msg.sender), ERC6909 {
     error fromIsReceiver();
     error insufficientBalance();
     error isNotOwnerNorOperator();
-    error alreadyOperator();
+
 
     modifier notMatured(uint _tokenId) {
         if(block.timestamp > TokenMetadata[_tokenId].expirationDate) revert isMature();
