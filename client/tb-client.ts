@@ -374,7 +374,7 @@ export class TBClient {
     } catch (error) {}
   }
 
-  async fetchBalance() {
+  async fetchAccountsBalance() {
     try {
       const operationsDoc = `
       query accountsBalance {
