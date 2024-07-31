@@ -326,7 +326,6 @@ export class TBClient {
     }
   }
 
-
   async isTransactionConfirmed(txHash: string): Promise<boolean> {
     let isTransactionConfirmed: boolean = false;
     try {
@@ -351,5 +350,50 @@ export class TBClient {
     } catch (error) {
       return isTransactionConfirmed;
     }
+  }
+
+  async queryGraphQL(
+    operationsDoc: string,
+    operationName: string,
+    variables: {}
+  ) {
+    try {
+      const result = await fetch(
+        "https://api.studio.thegraph.com/query/52116/ejara-tokenized-bond/version/latest",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            query: operationsDoc,
+            variables: variables,
+            operationName: operationName,
+          }),
+        }
+      );
+
+      const response = await result.json();
+
+      return response.data.accounts;
+    } catch (error) {}
+  }
+
+  async fetchBalance() {
+    try {
+      const operationsDoc = `
+      query accountsBalance {
+        accounts {
+          id
+          balance
+        }
+      }
+    `;
+
+      const accounts = await fetchGraphQL(operationsDoc, "accountsBalance", {});
+      const transformedData = accounts.reduce((acc, item) => {
+        acc[item.id] = +item.balance;
+        return acc;
+      }, {});
+
+      return JSON.stringify(transformedData, null, 2);
+    } catch (error) {}
   }
 }
