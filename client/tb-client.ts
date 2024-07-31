@@ -370,9 +370,7 @@ export class TBClient {
         }
       );
 
-      const response = await result.json();
-
-      return response.data.accounts;
+      return await result.json();
     } catch (error) {}
   }
 
@@ -387,7 +385,8 @@ export class TBClient {
       }
     `;
 
-      const accounts = await fetchGraphQL(operationsDoc, "accountsBalance", {});
+      const response = await fetchGraphQL(operationsDoc, "MyQuery", {});
+      const accounts = response.data.accounts;
       const transformedData = accounts.reduce((acc, item) => {
         acc[item.id] = +item.balance;
         return acc;
