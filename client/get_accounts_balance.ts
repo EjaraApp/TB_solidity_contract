@@ -1,4 +1,8 @@
-async function fetchGraphQL(operationsDoc, operationName, variables) {
+async function fetchGraphQL(
+  operationsDoc: any,
+  operationName: any,
+  variables: any
+) {
   const result = await fetch(
     "https://api.studio.thegraph.com/query/52116/ejara-tokenized-bond/version/latest",
     {
@@ -14,22 +18,22 @@ async function fetchGraphQL(operationsDoc, operationName, variables) {
   return await result.json();
 }
 
-(async () => {
+async function retrieveAddressesBalance(addresses: string[]) {
   const operationsDoc = `
-    query MyQuery {
-      accounts {
-        id
-        balance
-      }
+  query MyQuery {
+    accounts {
+      id
+      balance
     }
-  `;
+  }
+`;
 
   const response = await fetchGraphQL(operationsDoc, "MyQuery", {});
   const accounts = response.data.accounts;
-  const transformedData = accounts.reduce((acc, item) => {
-    acc[item.id] = +item.balance;
-    return acc;
-  }, {});
 
-  return transformedData;
-})();
+  const findAddressBalance = accounts
+    .filter((account) => addresses.includes(account.id))
+    .map((account) => ({ id: account.id, balance: Number(account.balance) }));
+
+  return findAddressBalance;
+}
