@@ -23,6 +23,7 @@ import {
   TokenItrAfterExpiryAllowed,
   Transfer,
 } from "../generated/schema";
+import { getOrCreateAccount, getOrCreateAccountToken } from "./helpers";
 
 export function handleApproval(event: ApprovalEvent): void {
   let entity = new Approval(
@@ -30,7 +31,7 @@ export function handleApproval(event: ApprovalEvent): void {
   );
   entity.owner = event.params.owner;
   entity.spender = event.params.spender;
-  entity.TBImpl_id = event.params.id;
+  entity.tokenId = event.params.id;
   entity.amount = event.params.amount;
 
   entity.blockNumber = event.block.number;
@@ -155,7 +156,7 @@ export function handleTransfer(event: TransferEvent): void {
   entity.caller = event.params.caller;
   entity.sender = event.params.sender;
   entity.receiver = event.params.receiver;
-  entity.TBImpl_id = event.params.id;
+  entity.tokenId = event.params.id;
   entity.amount = event.params.amount;
 
   entity.blockNumber = event.block.number;
@@ -164,25 +165,22 @@ export function handleTransfer(event: TransferEvent): void {
 
   entity.save();
 
-  const trackedToken = BigInt.fromI32(6);
+  const tb = TBImpl.bind(event.address);
 
-  const tb = TBImpl.bind(event.transaction.to!);
+  getOrCreateAccount(event.params.sender);
+  const senderToken = getOrCreateAccountToken(
+    event.params.sender,
+    event.params.id
+  );
+  senderToken.balance = tb.balanceOf(event.params.sender, event.params.id);
 
-  let sender = Account.load(event.params.sender);
-  if (sender == null) {
-    sender = new Account(event.params.sender);
-    sender.balance = tb.try_balanceOf(event.params.sender, trackedToken).value;
-  } else {
-    sender.balance = sender.balance.minus(event.params.amount);
-  }
+  senderToken.save();
 
-  sender.save();
-
-  let receiver = Account.load(event.params.receiver);
-  if (receiver == null) {
-    receiver = new Account(event.params.receiver);
-    receiver.balance = BigInt.fromI32(0);
-  } 
-  receiver.balance = receiver.balance.plus(event.params.amount);
-  receiver.save();
+  getOrCreateAccount(event.params.receiver);
+  const receiverToken = getOrCreateAccountToken(
+    event.params.receiver,
+    event.params.id
+  );
+  receiverToken.balance = tb.balanceOf(event.params.receiver, event.params.id);
+  receiverToken.save();
 }

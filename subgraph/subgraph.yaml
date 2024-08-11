@@ -1,4 +1,4 @@
-specVersion: 1.0.0
+specVersion: 1.2.0
 indexerHints:
   prune: auto
 schema:
@@ -48,4 +48,7 @@ dataSources:
           handler: handleTokenItrAfterExpiryAllowed
         - event: Transfer(address,indexed address,indexed address,indexed uint256,uint256)
           handler: handleTransfer
+          calls:
+            senderBalance: TBImpl[event.address].balanceOf(event.params.sender, event.params.id)
+            receiverBalance: TBImpl[event.address].balanceOf(event.params.receiver, event.params.id)
       file: ./src/tb-impl.ts
