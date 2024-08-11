@@ -95,7 +95,7 @@ type Account @entity {
 }
 
 type AccountToken @entity {
-  id: Bytes! #accountid_tokenId
+  id: String! #accountid_tokenId
   tokenId: BigInt!
   account: Account!
   balance: BigInt!

@@ -14,10 +14,10 @@ export function getOrCreateAccountToken(
   accountId: Address,
   tokenId: BigInt
 ): AccountToken {
-  const aTokenId = accountId.concat(Bytes.fromHexString(tokenId.toHexString()));
+  const aTokenId = accountId.toHexString().concat('_').concat(tokenId.toHexString());
   let aToken = AccountToken.load(aTokenId);
   if (aToken == null) {
-    aToken = new AccountToken(accountId);
+    aToken = new AccountToken(aTokenId);
     aToken.account = accountId;
     aToken.tokenId = tokenId;
     aToken.balance = BigInt.fromI32(0);
