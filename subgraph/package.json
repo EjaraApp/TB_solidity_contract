@@ -1,13 +1,13 @@
 {
-  "name": "ejara-tokenized-bond",
+  "name": "ejara-tb-base",
   "license": "UNLICENSED",
   "scripts": {
     "codegen": "graph codegen",
     "build": "graph build",
-    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ ejara-tokenized-bond",
-    "create-local": "graph create --node http://localhost:8020/ ejara-tokenized-bond",
-    "remove-local": "graph remove --node http://localhost:8020/ ejara-tokenized-bond",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 ejara-tokenized-bond",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ ejara-tb-base",
+    "create-local": "graph create --node http://localhost:8020/ ejara-tb-base",
+    "remove-local": "graph remove --node http://localhost:8020/ ejara-tb-base",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 ejara-tb-base",
     "test": "graph test"
   },
   "dependencies": {
